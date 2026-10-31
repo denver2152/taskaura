@@ -16,6 +16,8 @@ test('one-time code and invitation records expire automatically',()=>{
 test('task model supports all statuses and bounded time entries',()=>{
   assert.deepEqual(Task.schema.path('status').enumValues,['Backlog','To Do','In Progress','In Review','Completed','Cancelled']);
   assert.equal(Task.schema.path('timeEntries').$embeddedSchemaType.schema.path('minutes').options.max,1440);
+  assert.deepEqual(Task.schema.path('recurrence.frequency').enumValues,['none','daily','weekly','monthly']);
+  assert.equal(Task.schema.indexes().some(([keys,options])=>keys.recurrenceParent===1&&keys.occurrenceDate===1&&options.unique&&options.sparse),true);
 });
 
 test("focus sessions are restricted to one user's workspace and unique client session ids",()=>{

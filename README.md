@@ -13,6 +13,9 @@ Taskaura is a full stack task and project management workspace built with React,
 - Kanban and list task views, priorities, start and due dates, tags, subtasks, comments, task duplication, archiving, restoration, and recorded focus sessions.
 - Projects support editable status, dates, milestones, colors, and progress calculated from active task records.
 - Month calendar based on task deadlines; Pomodoro focus rounds (25/5/15) persist across navigation and save session history to MongoDB.
+- Calendar month, week, day, and agenda views with project filtering and due-date rescheduling.
+- Global debounced workspace search across tasks, projects, members, and task comments; results are limited to the active workspace.
+- Rule-based Taskaura Insights for weekly activity, overdue and near-deadline tasks, workload checks, and a transparent lightest-deadline-day suggestion.
 - Workspace invitations by email, role management and member removal for administrators, and multi-workspace switching.
 - Dashboard and reporting data calculated from MongoDB records.
 - CSV report export, responsive layouts, and light/dark themes.
