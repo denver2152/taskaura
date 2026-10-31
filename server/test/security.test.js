@@ -2,6 +2,7 @@
 import assert from 'node:assert/strict';
 import {hashOtp,matchesOtp} from '../src/security/otp.js';
 import {isSessionVersionCurrent} from '../src/security/session.js';
+import {mayChangeMemberRole} from '../src/security/authorization.js';
 
 test('verification codes are keyed hashes bound to the account email',()=>{
   const secret='a-test-secret-with-enough-entropy';
@@ -19,4 +20,11 @@ test('password changes invalidate old token versions while allowing legacy versi
   assert.equal(isSessionVersionCurrent('2',2),true);
   assert.equal(isSessionVersionCurrent(1,2),false);
   assert.equal(isSessionVersionCurrent(0,1),false);
+});
+
+test('admins cannot demote owners or promote another administrator',()=>{
+  assert.equal(mayChangeMemberRole('admin','owner','viewer'),false);
+  assert.equal(mayChangeMemberRole('admin','member','admin'),false);
+  assert.equal(mayChangeMemberRole('owner','member','admin'),true);
+  assert.equal(mayChangeMemberRole('admin','member','viewer'),true);
 });
