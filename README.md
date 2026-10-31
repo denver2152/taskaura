@@ -11,8 +11,8 @@ Taskaura is a full stack task and project management workspace built with React,
 - Password change and reset revoke all older sessions; account deletion requires password confirmation and safely transfers workspace ownership when needed.
 - Workspace isolated task and project CRUD with server side validation and role checks.
 - Kanban and list task views, priorities, start and due dates, tags, subtasks, comments, task duplication, archiving, restoration, and recorded focus sessions.
-- Project progress calculated from active task records.
-- Month calendar based on task deadlines.
+- Projects support editable status, dates, milestones, colors, and progress calculated from active task records.
+- Month calendar based on task deadlines; Pomodoro focus rounds (25/5/15) persist across navigation and save session history to MongoDB.
 - Workspace invitations by email, role management and member removal for administrators, and multi-workspace switching.
 - Dashboard and reporting data calculated from MongoDB records.
 - CSV report export, responsive layouts, and light/dark themes.
@@ -46,7 +46,7 @@ Requirements: Node.js 20 or newer and a local MongoDB instance or MongoDB Atlas 
 
 ### Configure Brevo email verification
 
-In Brevo, create an API key for transactional email and verify the sender address or sending domain. Add these values to `server/.env` (never `client/.env`): `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, and optionally `BREVO_SENDER_NAME=TASKAURA`. Restart the API. Registration sends a six-digit code; enter it in Taskaura to create the account. Codes expire after 10 minutes, allow five verification attempts, and can be resent after 60 seconds. See [Brevo's transactional email guide](https://developers.brevo.com/docs/send-a-transactional-email) and [sender setup guide](https://developers.brevo.com/docs/getting-started-with-senders-and-domains).
+In Brevo, create an API key with Transactional email permission and verify the sender address or sending domain. Add `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, and optionally `BREVO_SENDER_NAME=TASKAURA` to `server/.env` (never `client/.env`). Restart the API. Sign-up and password recovery use six-digit codes that expire after 10 minutes, allow five attempts, and can be resent after 60 seconds. Workspace invitations are sent to the invited email and expire after seven days. See [Brevo's transactional email guide](https://developers.brevo.com/docs/send-a-transactional-email) and [sender setup guide](https://developers.brevo.com/docs/getting-started-with-senders-and-domains).
 
 `npm run dev:server` and `npm run dev:client` start services individually. The API health endpoint is `/api/health`.
 

@@ -1,0 +1,6 @@
+import jwt from 'jsonwebtoken';
+import {User,Workspace} from '../models/index.js';
+import {isSessionVersionCurrent} from '../security/session.js';
+export async function auth(req,res,next){try{const token=(req.headers.authorization||'').replace(/^Bearer\s+/i,'');if(!token)return res.status(401).json({message:'Sign in to continue'});const p=jwt.verify(token,process.env.JWT_SECRET);const user=await User.findById(p.sub);if(!user)return res.status(401).json({message:'Session expired'});if(!isSessionVersionCurrent(p.ver,user.tokenVersion))return res.status(401).json({message:'Session expired'});const ws=await Workspace.findById(user.workspace);if(!ws||!ws.members.some(m=>m.user.equals(user._id)))return res.status(403).json({message:'Workspace access revoked'});req.user=user;req.workspace=ws;req.role=ws.members.find(m=>m.user.equals(user._id)).role;next();}catch{return res.status(401).json({message:'Invalid or expired session'});}}
+export function requireWrite(req,res,next){if(req.role==='viewer')return res.status(403).json({message:'Viewer access is read only'});next();}
+export function requireAdmin(req,res,next){if(!['owner','admin'].includes(req.role))return res.status(403).json({message:'Administrator access required'});next();}
