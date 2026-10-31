@@ -18,7 +18,7 @@ test('task model supports all statuses and bounded time entries',()=>{
   assert.equal(Task.schema.path('timeEntries').$embeddedSchemaType.schema.path('minutes').options.max,1440);
 });
 
-test('focus sessions are restricted to one user's workspace and unique client session ids',()=>{
+test("focus sessions are restricted to one user's workspace and unique client session ids",()=>{
   assert.equal(FocusSession.schema.path('workspace').options.required,true);
   assert.equal(FocusSession.schema.path('user').options.required,true);
   assert.equal(FocusSession.schema.path('kind').enumValues.includes('focus'),true);
