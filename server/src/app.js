@@ -5,7 +5,9 @@ import rateLimit from 'express-rate-limit';
 import morgan from 'morgan';
 import router from './routes/index.js';
 import { connectDB } from './config/db.js';
+import { assertProductionConfiguration } from './config/production.js';
 
+assertProductionConfiguration();
 const app = express();
 const origins = (process.env.CLIENT_URL || 'http://localhost:5173')
   .split(',')
@@ -77,6 +79,12 @@ app.use((error, _req, res, _next) => {
   if (error.code === 'LIMIT_FILE_SIZE') {
     return res.status(413).json({ message: 'Attachments must be 10 MB or smaller' });
   }
+  if (error.type === 'entity.too.large') {
+    return res.status(413).json({ message: 'Request body is too large' });
+  }
+  if (error.type === 'entity.parse.failed') {
+    return res.status(400).json({ message: 'Request body must contain valid JSON' });
+  }
   if (error.name === 'MulterError') {
     return res.status(400).json({ message: 'The attachment upload could not be processed' });
   }
@@ -86,8 +94,15 @@ app.use((error, _req, res, _next) => {
   if (error.name === 'CastError' || error.name === 'ValidationError') {
     return res.status(400).json({ message: 'Invalid request data' });
   }
+  if (error.message?.startsWith('JWT_SECRET must be configured')) {
+    return res.status(503).json({ message: 'Authentication is not configured on the API server.' });
+  }
   if (error.message === 'Origin is not allowed by CORS') {
     return res.status(403).json({ message: 'This origin is not allowed' });
+  }
+  if (error.message === 'MONGODB_URI is required' || error.name === 'MongooseServerSelectionError' || ['ECONNREFUSED', 'ENOTFOUND', 'querySrv'].includes(error.code)) {
+    console.error('Database connection failed:', { name: error.name, code: error.code });
+    return res.status(503).json({ message: 'Database is unavailable. Check the API server connection settings.' });
   }
 
   // Log only stable error metadata; database and provider messages may contain secrets.

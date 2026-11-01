@@ -12,18 +12,25 @@ export async function sendVerificationCode({email, code, purpose = 'verification
   const instruction = recovery
     ? 'Enter this code to reset your password. It expires in 10 minutes.'
     : 'Enter this code to finish creating your account. It expires in 10 minutes.';
-  const response = await fetch('https://api.brevo.com/v3/smtp/email', {
-    method: 'POST',
-    headers: {accept: 'application/json', 'content-type': 'application/json', 'api-key': apiKey},
-    signal: AbortSignal.timeout(10000),
-    body: JSON.stringify({
+  let response;
+  try {
+    response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {accept: 'application/json', 'content-type': 'application/json', 'api-key': apiKey},
+      signal: AbortSignal.timeout(10000),
+      body: JSON.stringify({
       sender: {name: senderName, email: senderEmail},
       to: [{email}],
       subject,
       textContent: `${heading}: ${code}. ${instruction} If you did not request this, you can ignore this email.`,
       htmlContent: `<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;padding:32px;color:#20211f"><div style="font-size:13px;font-weight:700;letter-spacing:2px;color:#526b57">TASKAURA</div><h1 style="font-size:22px;margin:24px 0 8px">${heading}</h1><p style="color:#666">${instruction}</p><p style="font-size:32px;font-weight:700;letter-spacing:8px;padding:18px;background:#f4f5f1;border-radius:8px;text-align:center">${code}</p><p style="font-size:12px;color:#777">If you did not request this, you can ignore this email.</p></div>`
-    })
-  });
+      })
+    });
+  } catch (error) {
+    const code = error.cause?.code;
+    console.error(`Brevo request could not reach the email service: ${error.name || 'NetworkError'}${code ? ` (${code})` : ''}`);
+    throw Object.assign(new Error('Could not reach Brevo to send the verification email. Check the API server terminal and network connection.'), {status: 502});
+  }
 
   if (!response.ok) {
     let detail = '';

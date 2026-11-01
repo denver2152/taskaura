@@ -5,6 +5,7 @@ export function makeOtp(){
 }
 
 export function hashOtp(email,code,secret){
+  if(typeof secret!=='string'||secret.length<32)throw Object.assign(new Error('JWT_SECRET must be configured with at least 32 characters to protect verification codes.'),{status:503});
   return createHmac('sha256',secret).update(`${email}:${code}`).digest('hex');
 }
 
